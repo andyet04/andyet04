@@ -32,13 +32,13 @@ div.col4 {
 }
 @media (min-width: 600px) and (max-width: 1200px) {
     .adjustCharacter {
-        font-size: calc(3rem + (4-3) * ((100vw - 600px) / (1200 - 600)));
+        font-size: calc(3rem + (3.5-3) * ((100vw - 600px) / (1200 - 600)));
     }
 }
 
 @media (min-width: 1200px) {
     .adjustCharacter {
-        font-size: 4rem;
+        font-size: 3.5rem;
     }
 }
 div.col4 > div > b {
