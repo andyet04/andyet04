@@ -78,6 +78,7 @@
         console.log(EmptySelectCharacterArray[Character].length);
         $("#CharacterTextSelect").empty();
         $("#Character").empty();
+        $("#PhoneticText").empty();
         $("#Unicode_Input").val("");
         $("img.CharacterPicture").hide();
         $a = $("#CharacterTextSelect");
@@ -131,7 +132,7 @@
                 async: false,
                 success: function (data) {
                     $("#Character").empty();
-
+                    $("#PhoneticText").empty();
                     if (data != "") {
                         var jo = JSON.parse(data);
                         for (var key in jo) {
@@ -157,12 +158,14 @@
                 },
                 failure: function (errMsg) {
                     $("#Character").empty();
+                    $("#PhoneticText").empty();
                     $("img.CharacterPicture").attr("src", "");
                     $("img.CharacterPicture").hide();
                 }
             })
         } else {
             $("#Character").empty();
+            $("#PhoneticText").empty();
             $("img.CharacterPicture").attr("src", "");
             $("img.CharacterPicture").hide();
         }
