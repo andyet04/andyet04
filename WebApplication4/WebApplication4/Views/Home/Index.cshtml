@@ -1,0 +1,161 @@
+﻿@{
+    Layout = null;
+    var national_Characters = ViewBag.national_Characters;
+}
+@Styles.Render("~/Content/css")
+@Scripts.Render("~/bundles/modernizr")
+<script src="~/Scripts/jquery-3.6.0.js"></script>
+<script src="~/Scripts/bootstrap.js"></script>
+
+<div class="container">
+    <div class="frame">
+        <div class="Center">
+            <input id="Unicode_Input" type="text" name="Unicode"size=10 placeholder="等待輸入">
+            <span class="Example">例子:<b>4E00</b>/<b>國</b></span>
+        </div>
+        <img src="" class="CharacterPicture">
+        <br>
+        <br>
+        <table class="table table-bordered">
+            <tr id="Character">
+            </tr>
+        </table>
+        <button id="SelectCharacter"type="button" class="btn btn-primary">注音選擇</button>
+        <table id="CharacterText" class="table table-bordered CharacterText adjustCharacter" border='1' cellpadding="8">
+            <tbody>
+            </tbody>
+        </table>
+        <table id="CharacterTextSelect" class="table table-bordered CharacterText adjustCharacter" border='1' cellpadding="8">
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<script>
+
+    const ArrayString =
+    {
+        Unicode: "Unicode",
+        BIG_5: "BIG_5",
+        CNS: "CNS",
+        EUC: "EUC",
+        Integer: "整數",
+        Character: "國字",
+        Phonetic: "注音",
+        Radical: "部首",
+        Strokes_Total: "總筆畫",
+        Strokes_Radical: "部首外",
+    }
+    const ArrayCharacter = [
+        'ㄅ', 'ㄆ', 'ㄇ', 'ㄈ', 'ㄉ', 'ㄊ', 'ㄋ', 'ㄌ', 'ㄍ', 'ㄎ', 'ㄏ', 'ㄐ', 'ㄑ', 'ㄒ', 'ㄓ',
+        'ㄔ', 'ㄕ', 'ㄖ', 'ㄗ', 'ㄘ', 'ㄙ', '一', 'ㄨ', 'ㄩ', 'ㄚ', 'ㄛ', 'ㄜ', 'ㄝ', 'ㄞ', 'ㄟ', 'ㄠ', 'ㄡ', 'ㄢ', 'ㄣ', 'ㄤ', 'ㄥ', 'ㄦ'
+    ]
+    const EmptySelectCharacterArray = {}
+    for ($i = 0; $i < ArrayCharacter.length; $i++) {
+        EmptySelectCharacterArray[ArrayCharacter[$i]] = [];
+    }
+    $a = $("#CharacterText > tbody");
+    for ($i = 0; $i < ArrayCharacter.length; $i++) {
+        if ($i % 10 == 0) {
+            $a.append("<tr></tr>");
+        }
+        $a.append("<td>" + ArrayCharacter[$i] + "</td>");
+    }
+    $("#CharacterText").hide();
+    $("#SelectCharacter").click(function () {
+        $("#CharacterText").fadeToggle("slow");
+        $("#CharacterTextSelect").empty();
+    })
+    $("#CharacterText td ").click(function () {
+        var Character = $(this).text();
+        console.log(EmptySelectCharacterArray[Character].length);
+        $("#CharacterTextSelect").empty();
+        $("#Character").empty();
+        $("#Unicode_Input").val("");
+        $("img.CharacterPicture").hide();
+        $a = $("#CharacterTextSelect");
+        if (EmptySelectCharacterArray[Character].length == 0) {
+            $.ajax({
+                type: "Post",
+                url: "../Home/ManyCharacter?Character=" + Character,
+                data: '{}',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    if (data != "") {
+                        var jo = JSON.parse(data);
+
+                        for ($i = 0; $i < jo.length; $i++) {
+                            if ($i % 10 == 0) {
+                                $a.append("<tr></tr>");
+                            }
+                            $a.append("<td>" + jo[$i].Character + "</td>");
+                            EmptySelectCharacterArray[Character].push(jo[$i].Character);
+                        }
+                    }
+                }
+            })
+        } else {
+            for ($i = 0; $i < EmptySelectCharacterArray[Character].length; $i++) {
+                if ($i % 10 == 0) {
+                    $a.append("<tr></tr>");
+                }
+                $a.append("<td>" + EmptySelectCharacterArray[Character][$i] + "</td>");
+            }
+        }
+        $("#CharacterTextSelect td ").click(function () {
+            var Character = $(this).text();
+            $("#Unicode_Input").val(Character);
+            $("#CharacterTextSelect").empty();
+            $("#Unicode_Input").trigger("input");
+        });
+    });
+    $("#Unicode_Input").bind("input propertychange", function (event) {
+        var value = $("#Unicode_Input").val();
+
+        if (value.length == 4 || value.length == 1) {
+            $.ajax({
+                type: "Post",
+                url: (value.length == 4 ? "../Home/NationalUnicode?Unicode=0x" + value : "../Home/NationalCharacter?Character=" + value),
+                data: '{}',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    $("#Character").empty();
+
+                    if (data != "") {
+                        var jo = JSON.parse(data);
+                        for (var key in jo) {
+                            if (jo[key] != "") {
+                                $("#Character").append("<div class= col4><div><b>" + ArrayString[key] + "</b><span>" + jo[key] + "</span></div></div>");
+                                $("#Character > div").addClass("adjustCharacter");
+                            }
+                        }
+                        $("img.CharacterPicture").attr("src", "/image/EUC/" + jo.Unicode + ".png");
+                        $("img.CharacterPicture").show();
+                    }
+                },
+                failure: function (errMsg) {
+                    $("#Character").empty();
+                    $("img.CharacterPicture").attr("src", "");
+                    $("img.CharacterPicture").hide();
+                }
+            })
+        } else {
+            $("#Character").empty();
+            $("img.CharacterPicture").attr("src", "");
+            $("img.CharacterPicture").hide();
+        }
+    });
+
+    $(document).ready(function () {
+        $("#Unicode_Input").on("focus", function () {
+            $(".Example").toggle();
+        }).on("blur", function () {
+            $(".Example").toggle();
+        });
+    });
+</script>
