@@ -10,7 +10,7 @@
 <div class="container">
     <div class="frame">
         <div class="Center">
-            <input id="Unicode_Input" type="text" name="Unicode"size=10 placeholder="等待輸入">
+            <input id="Unicode_Input" type="text" name="Unicode" size=10 placeholder="等待輸入">
             <span class="Example">例子:<b>4E00</b>/<b>國</b></span>
         </div>
         <img src="" class="CharacterPicture">
@@ -20,7 +20,13 @@
             <tr id="Character">
             </tr>
         </table>
-        <button id="SelectCharacter"type="button" class="btn btn-primary">注音選擇</button>
+
+        <table id="PhoneticText" class="table table-bordered CharacterText adjustCharacter" border='1' cellpadding="8">
+            <tbody>
+            </tbody>
+        </table>
+
+        <button id="SelectCharacter" type="button" class="btn btn-primary">注音選擇</button>
         <table id="CharacterText" class="table table-bordered CharacterText adjustCharacter" border='1' cellpadding="8">
             <tbody>
             </tbody>
@@ -33,7 +39,7 @@
 
 </div>
 <script>
-
+    var Array_Phonetic="";
     const ArrayString =
     {
         Unicode: "Unicode",
@@ -130,8 +136,19 @@
                         var jo = JSON.parse(data);
                         for (var key in jo) {
                             if (jo[key] != "") {
-                                $("#Character").append("<div class= col4><div><b>" + ArrayString[key] + "</b><span>" + jo[key] + "</span></div></div>");
-                                $("#Character > div").addClass("adjustCharacter");
+                                if (key == "Phonetic") {
+                                    Array_Phonetic = jo[key].split("/");
+                                    for ($i = 0; $i < Array_Phonetic.length; $i++) {
+                                        if ($i % 10 == 0) {
+                                            $("#PhoneticText").append("<tr></tr>");
+                                        }
+                                        $("#PhoneticText").append("<td>" + Array_Phonetic[$i] + "</td>");
+                                    }
+                                }
+                                else {
+                                    $("#Character").append("<div class= col4><div><b>" + ArrayString[key] + "</b><span>" + jo[key] + "</span></div></div>");
+                                    $("#Character > div").addClass("adjustCharacter");
+                                }
                             }
                         }
                         $("img.CharacterPicture").attr("src", "/image/EUC/" + jo.Unicode + ".png");
